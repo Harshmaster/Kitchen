@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "988446845348",
+    "firebase_url": "https://chhole-bhatoore.firebaseio.com",
+    "project_id": "chhole-bhatoore",
+    "storage_bucket": "chhole-bhatoore.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:988446845348:android:57837e2536cf17029cf931",
+        "android_client_info": {
+          "package_name": "cholle.bhatoore"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "988446845348-7vg9bl73bljq5uefo0kmhekpu4lhv5pe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyByCUPrskkg0tAg9of_Zo-OvDgvtxksE7Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "988446845348-7vg9bl73bljq5uefo0kmhekpu4lhv5pe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
