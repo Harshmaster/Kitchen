@@ -126,6 +126,8 @@ class _OrderCardState extends State<OrderCard> {
               ],
             ),
             Dropdown(
+              isUpdate: true,
+               isOrderId:true,
               isPayment: true,
               id: widget.id,
               leftMargin: 0,
@@ -141,6 +143,7 @@ class _OrderCardState extends State<OrderCard> {
               ],
             ),
             Dropdown(
+             isUpdate: true,
               isStatus: true,
               id: widget.id,
               value: statusController,

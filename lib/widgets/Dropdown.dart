@@ -9,6 +9,8 @@ class Dropdown extends StatefulWidget {
   final String id;
   final bool isPayment;
   final bool isStatus;
+  final bool isOrderId;
+  final bool isUpdate;
 
   Dropdown({
     this.itemList,
@@ -18,6 +20,8 @@ class Dropdown extends StatefulWidget {
     this.id,
     this.isPayment = false,
     this.isStatus = false,
+    this.isOrderId,
+    this.isUpdate = false,
   });
 
   @override
@@ -59,27 +63,46 @@ class _DropdownState extends State<Dropdown> {
         hint: Text(widget.hint),
         value: selectedItem,
         onChanged: (String value) async {
+          setState(() {
+            selectedItem = value;
+            widget.value.text = value;
+          });
 
-          if (widget.isStatus) {
-            await Firestore.instance
-                .collection("all orders")
-                .document(todayDate)
-                .collection("orders")
-                .document(widget.id)
-                .updateData({
-              "status": value,
-            });
-          }
+          if (widget.isUpdate) {
+            if (widget.isPayment) {
+              await Firestore.instance
+                  .collection("all orders")
+                  .document(todayDate)
+                  .collection("orders")
+                  .document(widget.id)
+                  .updateData({
+                "payment": value,
+              });
+            }
 
-          if (widget.isPayment) {
-            await Firestore.instance
-                .collection("all orders")
-                .document(todayDate)
-                .collection("orders")
-                .document(widget.id)
-                .updateData({
-              "payment": value,
-            });
+            if (widget.isStatus) {
+              await Firestore.instance
+                  .collection("all orders")
+                  .document(todayDate)
+                  .collection("orders")
+                  .document(widget.id)
+                  .updateData({
+                "status": value,
+              });
+            }
+          } else {
+            if (widget.isOrderId) {
+              if (widget.isPayment) {
+                await Firestore.instance
+                    .collection("all orders")
+                    .document(todayDate)
+                    .collection("orders")
+                    .document(widget.id)
+                    .setData({
+                  "payment": value,
+                });
+              }
+            }
           }
         },
         items: widget.itemList.map(

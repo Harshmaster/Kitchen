@@ -37,6 +37,17 @@ class _HomePageState extends State<HomePage> {
     status = 'Ongoing';
   }
 
+  initialFirebase() async {
+    await Firestore.instance
+        .collection("all orders")
+        .document(todayDate)
+        .collection("orders")
+        .document(orderId)
+        .setData({
+      "initial": "empty",
+    });
+  }
+
   fetchData() async {
     await Firestore.instance
         .collection("all orders")
@@ -49,9 +60,7 @@ class _HomePageState extends State<HomePage> {
           delivered = doc["delivered"];
         });
       }
-    }).then((value) {
-      print(total);
-      print(delivered);
+      genereateId();
     });
   }
 
@@ -66,96 +75,93 @@ class _HomePageState extends State<HomePage> {
           return SpinKitCircle(color: Colors.white);
         });
 
-    await genereateId().then((unused) async {
+    await Firestore.instance
+        .collection("all orders")
+        .document(todayDate)
+        .collection("orders")
+        .document(orderId)
+        .setData({
+      "name": nameController.text,
+      "phone": phoneController.text,
+      "plates": platesController.text,
+      "payment": paymentController.text,
+      "status": status,
+      "id": orderId,
+    }).then((value) async {
       await Firestore.instance
           .collection("all orders")
           .document(todayDate)
-          .collection("orders")
-          .document(orderId)
           .setData({
-        "name": nameController.text,
-        "phone": phoneController.text,
-        "plates": platesController.text,
-        "payment": paymentController.text,
-        "status": status,
-        "id": orderId,
-      }).then((value) async {
-        await Firestore.instance
-            .collection("all orders")
-            .document(todayDate)
-            .setData({
-          "total": total + 1,
-        });
-      }).then((useless) async {
-        print(phoneController.text.toString());
-        FlutterOtp().sendOtp(phoneController.text.toString(),
-            'Hi ${nameController.text} ! Your Order Has been placed Successfully. Order Id: $orderId');
-        fetchData();
-        setState(() {
-          todayDate = DateTime.now().day.toString() +
-              "-" +
-              DateTime.now().month.toString() +
-              "-" +
-              DateTime.now().year.toString();
-
-          nameController.clear();
-          phoneController.clear();
-          platesController.clear();
-          paymentController.text = 'Pending';
-        });
-
-        Navigator.of(context).pop();
-
-        showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: Text(
-                  "SUCCESS",
-                  style: TextStyle(color: Colors.green[900]),
-                ),
-                content: Container(
-                  height: MediaQuery.of(context).size.height * 0.19,
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Order Placed Successfully.',
-                        style: TextStyle(
-                          fontSize: 20,
-                        ),
-                      ),
-                      Text(
-                        'Order ID : $orderId',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                actions: <Widget>[
-                  InkWell(
-                    onTap: () {
-                      _launchURL();
-                    },
-                    child: Container(
-                      width: 23,
-                      height: 23,
-                      child: Image.asset('assets/whatsapp.png'),
-                    ),
-                  ),
-                  FlatButton(
-                    child: Text('OK'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              );
-            });
+        "total": total + 1,
       });
+    }).then((useless) async {
+      print(phoneController.text.toString());
+      FlutterOtp().sendOtp(phoneController.text.toString(),
+          'Hi ${nameController.text} ! Your Order Has been placed Successfully. Order Id: $orderId');
+      fetchData();
+      setState(() {
+        todayDate = DateTime.now().day.toString() +
+            "-" +
+            DateTime.now().month.toString() +
+            "-" +
+            DateTime.now().year.toString();
+      });
+
+      Navigator.of(context).pop();
+
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text(
+                "SUCCESS",
+                style: TextStyle(color: Colors.green[900]),
+              ),
+              content: Container(
+                height: MediaQuery.of(context).size.height * 0.19,
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Order Placed Successfully.',
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),
+                    ),
+                    Text(
+                      'Order ID : $orderId',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                InkWell(
+                  onTap: () async {
+                    _launchURL();
+                  },
+                  child: Container(
+                    width: 23,
+                    height: 23,
+                    child: Image.asset('assets/whatsapp.png'),
+                  ),
+                ),
+                FlatButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    nameController.clear();
+                    phoneController.clear();
+                    platesController.clear();
+                    paymentController.text = 'Pending';
+                  },
+                ),
+              ],
+            );
+          });
     });
   }
 
@@ -175,10 +181,18 @@ class _HomePageState extends State<HomePage> {
   ];
 
   _launchURL() async {
+    print(phoneController.text);
+    int phone = int.parse(phoneController.text);
+    print(phone);
+
     var url =
-        'https://api.whatsapp.com/send?phone=+91${phoneController.text}&text=Hi ${nameController.text} ! Your Order Has been placed Successfully. Order Id: $orderId';
+        'https://api.whatsapp.com/send?phone=+91$phone&text=Hi ${nameController.text} ! Your Order Has been placed Successfully. Order Id: $orderId';
     if (await canLaunch(url)) {
       await launch(url);
+      nameController.clear();
+      phoneController.clear();
+      platesController.clear();
+      paymentController.text = 'Pending';
     } else {
       throw 'Could not launch $url';
     }
@@ -289,18 +303,25 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                       ),
-                      Dropdown(
-                        value: paymentController,
-                        leftMargin: 30,
-                        hint: "Pending",
-                        itemList: [
-                          "Pending",
-                          "Cash",
-                          "Self Paid",
-                          "Paytm-1",
-                          "Paytm-2",
-                          "G-Pay",
-                        ],
+                      Container(
+                        margin: EdgeInsets.only(right: 30),
+                        child: Dropdown(
+                          isUpdate: false,
+                          id: orderId,
+                          isOrderId: true,
+                          isPayment: true,
+                          value: paymentController,
+                          leftMargin: 30,
+                          hint: "Pending",
+                          itemList: [
+                            "Pending",
+                            "Cash",
+                            "Self Paid",
+                            "Paytm-1",
+                            "Paytm-2",
+                            "G-Pay",
+                          ],
+                        ),
                       ),
                       Card(
                         shape: RoundedRectangleBorder(
@@ -342,7 +363,7 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                       Container(
-                        margin: EdgeInsets.only(left:20,right:20),
+                        margin: EdgeInsets.only(left: 20, right: 20),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
