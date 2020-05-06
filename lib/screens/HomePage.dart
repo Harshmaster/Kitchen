@@ -1,3 +1,4 @@
+import 'package:new_bhatoore/screens/Contactpage.dart';
 import '../widgets/PaymentTabBar.dart';
 import 'package:flutter_otp/flutter_otp.dart';
 import '../widgets/Dropdown.dart';
@@ -74,6 +75,19 @@ class _HomePageState extends State<HomePage> {
         builder: (context) {
           return SpinKitCircle(color: Colors.white);
         });
+
+    await Firestore.instance
+        .collection('customers')
+        .where('phone', isEqualTo: phoneController.text)
+        .getDocuments()
+        .then((docs) async { 
+      if (docs.documents.length == 0) {
+        await Firestore.instance.collection('customers').add({
+          "name": nameController.text,
+          "phone": phoneController.text,
+        });
+      }
+    });
 
     await Firestore.instance
         .collection("all orders")
@@ -277,12 +291,35 @@ class _HomePageState extends State<HomePage> {
                         label: 'Customer Name',
                         hint: 'eg. Harsh Singh',
                       ),
-                      GeneralField(
-                        controller: phoneController,
-                        label: 'Phone Number',
-                        hint: 'eg. 981511555',
-                        type: TextInputType.number,
-                      ),
+                      Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Container(
+                              width: MediaQuery.of(context).size.width * 0.9,
+                              child: GeneralField(
+                                controller: phoneController,
+                                label: 'Phone Number',
+                                hint: 'eg. 981511555',
+                                type: TextInputType.number,
+                              ),
+                            ),
+                            InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (BuildContext context) =>
+                                              ContactList(
+                                                phoneController:
+                                                    phoneController,
+                                                nameController: nameController,
+                                              )));
+                                },
+                                child: Container(
+                                  margin: EdgeInsets.only(bottom: 15),
+                                  child: Icon(Icons.person_add),
+                                ))
+                          ]),
                       GeneralField(
                         controller: platesController,
                         label: 'No. of Plates',
