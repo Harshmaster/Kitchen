@@ -15,6 +15,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int priorityCount = 0;
+  int postPriorityCount;
+  bool isVip = true;
   int total = 0;
   int delivered = 0;
   String orderId;
@@ -59,6 +62,8 @@ class _HomePageState extends State<HomePage> {
         setState(() {
           total = doc["total"];
           delivered = doc["delivered"];
+          postPriorityCount = doc["total"] + 20;
+          priorityCount = doc["priorityCount"];
         });
       }
       genereateId();
@@ -66,7 +71,12 @@ class _HomePageState extends State<HomePage> {
   }
 
   genereateId() async {
-    orderId = 'AA00' + (total + 1).toString();
+    if (postPriorityCount == null) {
+      postPriorityCount = 0;
+      orderId = 'AA00' + (postPriorityCount + 21).toString();
+    } else {
+      orderId = 'AA00' + (postPriorityCount + 1).toString();
+    }
   }
 
   writeData() async {
@@ -80,7 +90,7 @@ class _HomePageState extends State<HomePage> {
         .collection('customers')
         .where('phone', isEqualTo: phoneController.text)
         .getDocuments()
-        .then((docs) async { 
+        .then((docs) async {
       if (docs.documents.length == 0) {
         await Firestore.instance.collection('customers').add({
           "name": nameController.text,
@@ -106,6 +116,7 @@ class _HomePageState extends State<HomePage> {
           .collection("all orders")
           .document(todayDate)
           .setData({
+        "priorityCount": priorityCount + 1,
         "total": total + 1,
       });
     }).then((useless) async {
@@ -198,9 +209,9 @@ class _HomePageState extends State<HomePage> {
     print(phoneController.text);
     int phone = int.parse(phoneController.text);
     print(phone);
-
+    String newOrderId = 'AA00' + postPriorityCount.toString();
     var url =
-        'https://api.whatsapp.com/send?phone=+91$phone&text=Hi ${nameController.text} ! Your Order Has been placed Successfully. Order Id: $orderId';
+        'https://api.whatsapp.com/send?phone=+91$phone&text=Hi ${nameController.text} ! Your Order Has been placed Successfully. Order Id: $newOrderId';
     if (await canLaunch(url)) {
       await launch(url);
       nameController.clear();
