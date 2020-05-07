@@ -15,7 +15,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int priorityCount = 0;
+
+
   int postPriorityCount;
   bool isVip = true;
   int total = 0;
@@ -63,7 +64,6 @@ class _HomePageState extends State<HomePage> {
           total = doc["total"];
           delivered = doc["delivered"];
           postPriorityCount = doc["total"] + 20;
-          priorityCount = doc["priorityCount"];
         });
       }
       genereateId();
@@ -116,7 +116,6 @@ class _HomePageState extends State<HomePage> {
           .collection("all orders")
           .document(todayDate)
           .setData({
-        "priorityCount": priorityCount + 1,
         "total": total + 1,
       });
     }).then((useless) async {
